@@ -18,4 +18,9 @@ public class AzureTranslatorController {
     Map<String, Map<String, String>> translateText(@RequestBody Map<String, String> azureTranslatorRequest, @RequestParam List<String> targetLanguages, @RequestParam String from){
         return azureTranslatorService.translateText(azureTranslatorRequest, targetLanguages, from);
     }
+
+    @PostMapping("/many-documents")
+    Map<String, List<Map<String, String>>> translateManyTexts(@RequestBody List<Map<String, String>> azureTranslatorRequest, @RequestParam List<String> targetLanguages, @RequestParam String from){
+        return azureTranslatorService.translateManyTexts(azureTranslatorRequest, targetLanguages, from);
+    }
 }

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class AzureTranslatorService {
@@ -28,11 +29,8 @@ public class AzureTranslatorService {
     }
 
     public Map<String, Map<String, String>> translateText(Map<String, String> azureTranslatorRequest, List<String> targetLanguages, String from){
-        List<InputTextItem> content = new ArrayList<>();
-        for (Map.Entry<String, String> request : azureTranslatorRequest.entrySet()) {
-            content.add(new InputTextItem(request.getValue()));
-        }
-        List<TranslatedTextItem> translations = client.translate(targetLanguages, content, null, from, TextType.PLAIN, null, ProfanityAction.NO_ACTION, ProfanityMarker.ASTERISK, false, false, null, null, null, false);
+        List<TranslatedTextItem> translations = translateAzure(targetLanguages, from, azureTranslatorRequest);
+
         Map<String, Map<String, String>> azureTranslated = new HashMap<>();
         for (int i = 0; i < translations.size(); i++) {
             TranslatedTextItem translation = translations.get(i);
@@ -40,13 +38,44 @@ public class AzureTranslatorService {
             for (Translation languagesTranslation : translation.getTranslations()) {
                 String language = languagesTranslation.getTo();
                 String text = languagesTranslation.getText();
+                azureTranslated.computeIfAbsent(language, k -> new HashMap<>());
 
-                if (!azureTranslated.containsKey(language)) {
-                    azureTranslated.put(language, new HashMap<>());
-                }
                 azureTranslated.get(language).put(key, text);
             }
         }
         return azureTranslated;
+    }
+    public Map<String, List<Map<String, String>>> translateManyTexts(List<Map<String, String>> azureTranslatorRequest, List<String> targetLanguages, String from){
+        Map<String, List<Map<String, String>>> azureTranslated = new HashMap<>();
+        int j=0;
+        for (Map<String, String> object : azureTranslatorRequest) {
+            List<TranslatedTextItem> translations = translateAzure(targetLanguages, from, object);
+
+            for (int i = 0; i < translations.size(); i++) {
+                TranslatedTextItem translation = translations.get(i);
+                String key = object.keySet().toArray(new String[0])[i];
+                for (Translation languagesTranslation : translation.getTranslations()) {
+
+                    String language = languagesTranslation.getTo();
+                    String text = languagesTranslation.getText();
+                    azureTranslated.computeIfAbsent(language, k -> new ArrayList<>());
+
+                    while (azureTranslated.get(language).size() <= i) {
+                        azureTranslated.get(language).add(new HashMap<>());
+                    }
+
+                    azureTranslated.get(language).get(j).put(key, text);
+                }
+            }
+            j+=1;
+        }
+
+        return azureTranslated;
+    }
+
+    private List<TranslatedTextItem> translateAzure(List<String> targetLanguages, String from, Map<String, String> object) {
+        List<InputTextItem> content = object.values().stream().map(InputTextItem::new).collect(Collectors.toList());
+        List<TranslatedTextItem> translations = client.translate(targetLanguages, content, null, from, TextType.PLAIN, null, ProfanityAction.NO_ACTION, ProfanityMarker.ASTERISK, false, false, null, null, null, false);
+        return translations;
     }
 }
