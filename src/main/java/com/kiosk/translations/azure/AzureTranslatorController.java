@@ -1,13 +1,9 @@
 package com.kiosk.translations.azure;
 
-import com.azure.ai.translation.text.models.TranslatedTextItem;
-import com.kiosk.translations.azure.dtos.AzureTranslatorRequestDTO;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/translations")
@@ -19,7 +15,7 @@ public class AzureTranslatorController {
     }
 
     @PostMapping
-    List<TranslatedTextItem> translateText(@RequestBody AzureTranslatorRequestDTO azureTranslatorRequestDTO){
-        return azureTranslatorService.translateText(azureTranslatorRequestDTO);
+    Map<String, Map<String, String>> translateText(@RequestBody Map<String, String> azureTranslatorRequest, @RequestParam List<String> targetLanguages, @RequestParam String from){
+        return azureTranslatorService.translateText(azureTranslatorRequest, targetLanguages, from);
     }
 }
