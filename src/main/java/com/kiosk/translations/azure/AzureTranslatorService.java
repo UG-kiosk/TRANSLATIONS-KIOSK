@@ -28,24 +28,7 @@ public class AzureTranslatorService {
                 .buildClient();
     }
 
-    public Map<String, Map<String, String>> translateText(Map<String, String> azureTranslatorRequest, List<String> targetLanguages, String from){
-        List<TranslatedTextItem> translations = translateAzure(targetLanguages, from, azureTranslatorRequest);
-
-        Map<String, Map<String, String>> azureTranslated = new HashMap<>();
-        for (int i = 0; i < translations.size(); i++) {
-            TranslatedTextItem translation = translations.get(i);
-            String key = azureTranslatorRequest.keySet().toArray(new String[0])[i];
-            for (Translation languagesTranslation : translation.getTranslations()) {
-                String language = languagesTranslation.getTo();
-                String text = languagesTranslation.getText();
-                azureTranslated.computeIfAbsent(language, k -> new HashMap<>());
-
-                azureTranslated.get(language).put(key, text);
-            }
-        }
-        return azureTranslated;
-    }
-    public Map<String, List<Map<String, String>>> translateManyTexts(List<Map<String, String>> azureTranslatorRequest, List<String> targetLanguages, String from){
+    public Map<String, List<Map<String, String>>> translateTexts(List<Map<String, String>> azureTranslatorRequest, List<String> targetLanguages, String from){
         Map<String, List<Map<String, String>>> azureTranslated = new HashMap<>();
         int j=0;
         for (Map<String, String> object : azureTranslatorRequest) {
@@ -60,7 +43,7 @@ public class AzureTranslatorService {
                     String text = languagesTranslation.getText();
                     azureTranslated.computeIfAbsent(language, k -> new ArrayList<>());
 
-                    while (azureTranslated.get(language).size() <= i) {
+                    while (azureTranslated.get(language).size() <= j) {
                         azureTranslated.get(language).add(new HashMap<>());
                     }
 
