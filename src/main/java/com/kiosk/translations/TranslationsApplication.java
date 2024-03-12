@@ -1,5 +1,6 @@
 package com.kiosk.translations;
 
+import com.kiosk.translations.azure.AzureTranslatorService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
