@@ -1,18 +1,17 @@
-name: DEVELOP-CI-CD
+name: PROD-CD
 
 on:
   push:
     branches:
-      - develop
+      - production
 
 jobs:
   release:
-    needs: [run-unit-tests]
     runs-on: ubuntu-latest
 
     env:
-      image_tag: ${{vars.DOCKER_IMAGE_OWNER}}/kiosk-translations-dev:${GITHUB_SHA}
-      image_latest: ${{vars.DOCKER_IMAGE_OWNER}}/kiosk-translations-dev:latest
+      image_tag: ${{vars.DOCKER_IMAGE_OWNER}}/kiosk-translations-prod:${GITHUB_SHA}
+      image_latest: ${{vars.DOCKER_IMAGE_OWNER}}/kiosk-translations-prod:latest
 
     steps:
       - uses: actions/checkout@v4
@@ -41,4 +40,4 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Trigger deploy
-        run: curl --request POST '${{ secrets.DEPLOY_TRANSLATIONS_DEVELOP_WEBHOOK }}'
+        run: curl --request POST '${{ secrets.DEPLOY_TRANSLATIONS_PROD_WEBHOOK }}'
