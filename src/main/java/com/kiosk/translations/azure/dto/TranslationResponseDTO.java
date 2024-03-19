@@ -9,7 +9,7 @@ import java.util.Map;
 @Getter
 @Setter
 @NoArgsConstructor
-public class TranslationResponseData {
+public class TranslationResponseDTO {
     private String uniqueKey;
     private Map<String, Map<String, String>> translations;
 

@@ -7,7 +7,7 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class TranslationData {
+public class TranslationRequestDTO {
     private String uniqueKey;
     private Map<String, String> translationPayload;
 
