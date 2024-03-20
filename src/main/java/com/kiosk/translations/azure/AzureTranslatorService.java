@@ -4,6 +4,8 @@ import com.azure.ai.translation.text.TextTranslationClient;
 import com.azure.ai.translation.text.TextTranslationClientBuilder;
 import com.azure.ai.translation.text.models.*;
 import com.azure.core.credential.AzureKeyCredential;
+import com.kiosk.translations.azure.dto.TranslationRequestDTO;
+import com.kiosk.translations.azure.dto.TranslationResponseDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -28,32 +30,32 @@ public class AzureTranslatorService {
                 .buildClient();
     }
 
-    public Map<String, List<Map<String, String>>> translateTexts(List<Map<String, String>> azureTranslatorRequest, List<String> targetLanguages, String from){
-        Map<String, List<Map<String, String>>> azureTranslated = new HashMap<>();
-        int j=0;
-        for (Map<String, String> object : azureTranslatorRequest) {
-            List<TranslatedTextItem> translations = translateAzure(targetLanguages, from, object);
+    public List<TranslationResponseDTO> translateTexts(List<TranslationRequestDTO> azureTranslatorRequest, List<String> targetLanguages, String from){
+        List<TranslationResponseDTO> azureTranslatedResult = new ArrayList<>();
+        for (TranslationRequestDTO objectToTranslate : azureTranslatorRequest) {
+            List<TranslatedTextItem> translations = translateAzure(targetLanguages, from, objectToTranslate.getTranslationPayload());
+            Map<String, String> innerMap = objectToTranslate.getTranslationPayload();
+
+            TranslationResponseDTO translationObject = new TranslationResponseDTO();
+            translationObject.setUniqueKey(objectToTranslate.getUniqueKey());
+            translationObject.setTranslations(new HashMap<>());
 
             for (int i = 0; i < translations.size(); i++) {
                 TranslatedTextItem translation = translations.get(i);
-                String key = object.keySet().toArray(new String[0])[i];
+                String key = innerMap.keySet().toArray(new String[0])[i];
                 for (Translation languagesTranslation : translation.getTranslations()) {
-
                     String language = languagesTranslation.getTo();
                     String text = languagesTranslation.getText();
-                    azureTranslated.computeIfAbsent(language, k -> new ArrayList<>());
 
-                    while (azureTranslated.get(language).size() <= j) {
-                        azureTranslated.get(language).add(new HashMap<>());
-                    }
+                    translationObject.getTranslations().computeIfAbsent(language, k -> new HashMap<>());
 
-                    azureTranslated.get(language).get(j).put(key, text);
+                    translationObject.getTranslations().get(language).put(key, text);
                 }
             }
-            j+=1;
+            azureTranslatedResult.add(translationObject);
         }
 
-        return azureTranslated;
+        return azureTranslatedResult;
     }
 
     private List<TranslatedTextItem> translateAzure(List<String> targetLanguages, String from, Map<String, String> object) {
